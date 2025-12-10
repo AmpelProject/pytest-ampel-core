@@ -28,3 +28,21 @@ jobs:
       ruff-version: "0.14.7"
       # renovate: datasource=pypi depName=poetry versioning=pep440
       poetry-version: "2.2.1"
+  # Need to keep this step separate until pypi trusted publishing supports reusable workflows: https://github.com/pypi/warehouse/issues/11096
+  pypi:
+    needs: ci
+    runs-on: ubuntu-24.04
+    # NB: outputs are always strings; explicitly parse to get a boolean
+    if: ${{ fromJSON(needs.ci.outputs.should_publish) }}    
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing, but
+      # should NOT be granted anywhere else!
+      id-token: write
+
+    steps:
+      - name: Download built artifact to dist/
+        uses: actions/download-artifact@v4
+        with:
+          name: Packages
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1

@@ -36,6 +36,10 @@ on:
         description: extra files to check with mypy
         type: string
         default: ""
+    outputs:
+      should_publish:
+        description: "Should we publish a new version to PyPI?"
+        value: ${{ jobs.check_version.outputs.should_publish }}
 
 jobs:
 
