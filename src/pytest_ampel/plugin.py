@@ -74,7 +74,7 @@ def testing_config():
     return Path(__file__).parent / "test-data" / "testing-config.yaml"
 
 
-@pytest.usefixture("_patch_mongo")
+@pytest.mark.usefixtures("_patch_mongo")
 @pytest.fixture
 def mock_context(testing_config: Path):
     return DevAmpelContext.load(config=str(testing_config), purge_db=True)
