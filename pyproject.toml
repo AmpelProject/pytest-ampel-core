@@ -48,7 +48,8 @@ include = ["src.pytest_ampel"]
 
 [dependency-groups]
 dev = [
-    "mypy (>=1.19.0,<2.0.0)"
+    "mypy (>=1.19.0,<2.0.0)",
+    "types-pyyaml (>=6.0.12.20250915,<7.0.0.0)"
 ]
 
 [tool.poetry]
