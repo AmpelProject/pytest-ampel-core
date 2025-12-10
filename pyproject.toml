@@ -42,3 +42,8 @@ Repository = "https://github.com/AmpelProject/pytest-ampel-core"
 [project.entry-points.pytest11]
 ampel-core = "pytest_ampel.plugin"
 
+
+[dependency-groups]
+dev = [
+    "mypy (>=1.19.0,<2.0.0)"
+]
