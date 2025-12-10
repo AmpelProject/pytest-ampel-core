@@ -8,8 +8,33 @@ import mongomock.collection
 import pymongo
 import pytest
 import yaml
+from ampel.config.builder.DisplayOptions import DisplayOptions
+from ampel.config.builder.DistConfigBuilder import DistConfigBuilder
 from ampel.dev.DevAmpelContext import DevAmpelContext
 from ampel.log.AmpelLogger import DEBUG, AmpelLogger
+
+
+def test_build_config() -> None:
+    cb = DistConfigBuilder(
+        DisplayOptions(verbose=True, debug=True),
+        ignore_exc=["ModuleNotFoundError"],
+    )
+    cb.load_distributions(
+        prefixes=[
+            "ampel-interface",
+            "ampel-core",
+            "ampel-alerts",
+            "ampel-photometry",
+            "ampel-ztf",
+            "ampel-hu-astro",
+        ]
+    )
+    config = cb.build_config(
+        stop_on_errors=2,
+        config_validator="ConfigValidator",
+        get_unit_env=False,
+    )
+    assert config is not None
 
 
 def pytest_addoption(parser):
@@ -70,25 +95,34 @@ def _mongomock(monkeypatch):
 
 
 @pytest.fixture(scope="session")
-def testing_config():
+def testing_config(tmp_path_factory):
     """Path to an Ampel config file suitable for testing."""
-    return Path(__file__).parent / "test-data" / "testing-config.yaml"
+    config_path = tmp_path_factory.mktemp("config") / "testing-config.yaml"
+    # build a config from all available ampel distributions
+    cb = DistConfigBuilder(
+        DisplayOptions(verbose=True, debug=True),
+    )
+    cb.load_distributions()
+    config = cb.build_config(
+        stop_on_errors=2,
+        config_validator="ConfigValidator",
+        get_unit_env=False,
+    )
+    assert config is not None
+    # remove storageEngine options that are not supported by mongomock
+    for db in config["mongo"]["databases"]:
+        for collection in db["collections"]:
+            if "args" in collection and "storageEngine" in collection["args"]:
+                collection["args"].pop("storageEngine")
+    with open(config_path, "w") as f:
+        yaml.safe_dump(config, f)
+    return config_path
 
 
 @pytest.fixture
-def mock_context(testing_config: Path, tmp_path, _mongomock):
+def mock_context(testing_config: Path, _mongomock):
     """An AmpelContext with a mongomock backend."""
-    # remove storageEngine options that are not supported by mongomock
-    with open(testing_config) as f:
-        config = yaml.safe_load(f)
-        for db in config["mongo"]["databases"]:
-            for collection in db["collections"]:
-                if "args" in collection and "storageEngine" in collection["args"]:
-                    collection["args"].pop("storageEngine")
-    sanitized_config = tmp_path / "sanitized-testing-config.yaml"
-    with open(sanitized_config, "w") as f:
-        yaml.safe_dump(config, f)
-        return DevAmpelContext.load(config=str(sanitized_config), purge_db=True)
+    return DevAmpelContext.load(config=str(testing_config), purge_db=True)
 
 
 @pytest.fixture
