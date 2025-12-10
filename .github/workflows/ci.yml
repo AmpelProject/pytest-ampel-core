@@ -63,49 +63,49 @@ jobs:
         RUFF_FORMAT: github
       if: ${{ inputs.lint }}
 
-#   test:
-#     runs-on: ubuntu-24.04
-#     needs: [lint]
-#     services:
-#       mongo:
-#         # hobo conditional service; see https://github.com/actions/runner/issues/822#issuecomment-1831511432
-#         image: ${{ (inputs.mongo && 'mongo:7') || '' }}
-#         ports:
-#           - 27017:27017
-#     steps:
-#     - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-#     - name: "Set up environment"
-#       uses: packetcoders/action-setup-cache-python-poetry@0d0be5577b30d85f3fa2d93a4beeda149520f120 # v1.2.0
-#       with:
-#         python-version: ${{ inputs.python-version }}
-#         poetry-version: ${{ inputs.poetry-version }}
-#         install-args: --all-extras --compile --sync
-#     - name: Install root
-#       run: poetry run pip install -e . --no-deps
-#     - run: poetry run pytest
-#       env:
-#         MONGO_PORT: ${{ job.services.mongo.ports[27017] }}
+  test:
+    runs-on: ubuntu-24.04
+    needs: [lint]
+    services:
+      mongo:
+        # hobo conditional service; see https://github.com/actions/runner/issues/822#issuecomment-1831511432
+        image: ${{ (inputs.mongo && 'mongo:8') || '' }}
+        ports:
+          - 27017:27017
+    steps:
+    - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+    - name: "Set up environment"
+      uses: packetcoders/action-setup-cache-python-poetry@0d0be5577b30d85f3fa2d93a4beeda149520f120 # v1.2.0
+      with:
+        python-version: ${{ inputs.python-version }}
+        poetry-version: ${{ inputs.poetry-version }}
+        install-args: --all-extras --compile --sync
+    - name: Install root
+      run: poetry run pip install -e . --no-deps
+    - run: poetry run pytest
+      env:
+        MONGO_PORT: ${{ job.services.mongo.ports[27017] }}
   
-#   mypy:
-#     runs-on: ubuntu-24.04
-#     needs: [lint]
-#     steps:
-#     - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-#     - name: "Set up environment"
-#       uses: packetcoders/action-setup-cache-python-poetry@0d0be5577b30d85f3fa2d93a4beeda149520f120 # v1.2.0
-#       with:
-#         python-version: ${{ inputs.python-version }}
-#         poetry-version: ${{ inputs.poetry-version }}
-#         install-args: --all-extras --compile --sync
-#     - name: Install root
-#       run: poetry run pip install -e . --no-deps
-#     - run: poetry run mypy
-#     - if: ${{ inputs.mypy-check-files }}
-#       run: poetry run mypy ${{ inputs.mypy-check-files }}
+  mypy:
+    runs-on: ubuntu-24.04
+    needs: [lint]
+    steps:
+    - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+    - name: "Set up environment"
+      uses: packetcoders/action-setup-cache-python-poetry@0d0be5577b30d85f3fa2d93a4beeda149520f120 # v1.2.0
+      with:
+        python-version: ${{ inputs.python-version }}
+        poetry-version: ${{ inputs.poetry-version }}
+        install-args: --all-extras --compile --sync
+    - name: Install root
+      run: poetry run pip install -e . --no-deps
+    - run: poetry run mypy
+    - if: ${{ inputs.mypy-check-files }}
+      run: poetry run mypy ${{ inputs.mypy-check-files }}
 
   build:
     runs-on: ubuntu-24.04
-    # needs: [test, mypy]
+    needs: [test, mypy]
     steps:
     - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
     - uses: hynek/build-and-inspect-python-package@v2
@@ -119,5 +119,5 @@ jobs:
     outputs:
       should_publish: ${{ steps.check.outputs.should_publish }} 
     steps:
-    - uses: jvansanten/action-tag-poetry-version-bump@416de841b74822225809a867d4a3df8b1a3fd338 # v1.1 (or will be)
+    - uses: jvansanten/action-tag-poetry-version-bump@4b414cab984b5cf6507593525a1dea5789f886de # v1.1
       id: check
