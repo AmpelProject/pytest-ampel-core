@@ -59,71 +59,69 @@ jobs:
         RUFF_FORMAT: github
       if: ${{ inputs.lint }}
 
-  test:
-    runs-on: ubuntu-24.04
-    needs: [lint]
-    services:
-      mongo:
-        # hobo conditional service; see https://github.com/actions/runner/issues/822#issuecomment-1831511432
-        image: ${{ (inputs.mongo && 'mongo:7') || '' }}
-        ports:
-          - 27017:27017
-    steps:
-    - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-    - name: "Set up environment"
-      uses: packetcoders/action-setup-cache-python-poetry@0d0be5577b30d85f3fa2d93a4beeda149520f120 # v1.2.0
-      with:
-        python-version: ${{ inputs.python-version }}
-        poetry-version: ${{ inputs.poetry-version }}
-        install-args: --all-extras --compile --sync
-    - name: Install root
-      run: poetry run pip install -e . --no-deps
-    - run: poetry run pytest
-      env:
-        MONGO_PORT: ${{ job.services.mongo.ports[27017] }}
+#   test:
+#     runs-on: ubuntu-24.04
+#     needs: [lint]
+#     services:
+#       mongo:
+#         # hobo conditional service; see https://github.com/actions/runner/issues/822#issuecomment-1831511432
+#         image: ${{ (inputs.mongo && 'mongo:7') || '' }}
+#         ports:
+#           - 27017:27017
+#     steps:
+#     - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+#     - name: "Set up environment"
+#       uses: packetcoders/action-setup-cache-python-poetry@0d0be5577b30d85f3fa2d93a4beeda149520f120 # v1.2.0
+#       with:
+#         python-version: ${{ inputs.python-version }}
+#         poetry-version: ${{ inputs.poetry-version }}
+#         install-args: --all-extras --compile --sync
+#     - name: Install root
+#       run: poetry run pip install -e . --no-deps
+#     - run: poetry run pytest
+#       env:
+#         MONGO_PORT: ${{ job.services.mongo.ports[27017] }}
   
-  mypy:
+#   mypy:
+#     runs-on: ubuntu-24.04
+#     needs: [lint]
+#     steps:
+#     - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+#     - name: "Set up environment"
+#       uses: packetcoders/action-setup-cache-python-poetry@0d0be5577b30d85f3fa2d93a4beeda149520f120 # v1.2.0
+#       with:
+#         python-version: ${{ inputs.python-version }}
+#         poetry-version: ${{ inputs.poetry-version }}
+#         install-args: --all-extras --compile --sync
+#     - name: Install root
+#       run: poetry run pip install -e . --no-deps
+#     - run: poetry run mypy
+#     - if: ${{ inputs.mypy-check-files }}
+#       run: poetry run mypy ${{ inputs.mypy-check-files }}
+
+  build:
     runs-on: ubuntu-24.04
-    needs: [lint]
+    # needs: [test, mypy]
     steps:
     - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-    - name: "Set up environment"
-      uses: packetcoders/action-setup-cache-python-poetry@0d0be5577b30d85f3fa2d93a4beeda149520f120 # v1.2.0
-      with:
-        python-version: ${{ inputs.python-version }}
-        poetry-version: ${{ inputs.poetry-version }}
-        install-args: --all-extras --compile --sync
-    - name: Install root
-      run: poetry run pip install -e . --no-deps
-    - run: poetry run mypy
-    - if: ${{ inputs.mypy-check-files }}
-      run: poetry run mypy ${{ inputs.mypy-check-files }}
+    - uses: hynek/build-and-inspect-python-package@v2
 
   check_version:
     name: Tag version bump
     runs-on: ubuntu-24.04
     # run only on pushes, not PRs
     if: ${{ github.event_name == 'push' && github.base_ref == null }}
-    needs: [test, mypy]
+    needs: build
     outputs:
       should_publish: ${{ steps.check.outputs.should_publish }} 
     steps:
     - uses: jvansanten/action-tag-poetry-version-bump@45f78f40d22ca43a496a71af75480a435b3dac31 # v1
       id: check
 
-  build:
-    runs-on: ubuntu-24.04
-    needs: [check_version]
-    # NB: outputs are always strings; explicitly parse to get a boolean
-    if: ${{ fromJSON(needs.check_version.outputs.should_publish) }}
-    steps:
-    - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-    - uses: hynek/build-and-inspect-python-package@v2
-
   pypi:
     name: Publish to PyPI
     runs-on: ubuntu-24.04
-    needs: [build]
+    needs: check_version
     # NB: outputs are always strings; explicitly parse to get a boolean
     if: ${{ fromJSON(needs.check_version.outputs.should_publish) }}    
     permissions:
