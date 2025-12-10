@@ -7,9 +7,9 @@ import mongomock
 import mongomock.collection
 import pymongo
 import pytest
-
+import yaml
 from ampel.dev.DevAmpelContext import DevAmpelContext
-from ampel.log.AmpelLogger import AmpelLogger, DEBUG
+from ampel.log.AmpelLogger import DEBUG, AmpelLogger
 
 
 def pytest_addoption(parser):
@@ -22,7 +22,7 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope="session")
-def mongod(pytestconfig):
+def _mongod(pytestconfig):
     if port := environ.get("MONGO_PORT"):
         yield f"mongodb://localhost:{port}"
         return
@@ -52,10 +52,10 @@ def mongod(pytestconfig):
 
 
 @pytest.fixture
-def _patch_mongo(monkeypatch):
+def _mongomock(monkeypatch):
     monkeypatch.setattr("ampel.core.AmpelDB.MongoClient", mongomock.MongoClient)
     # ignore codec_options in DataLoader
-    monkeypatch.setattr("mongomock.codec_options.is_supported", lambda *args: None)
+    monkeypatch.setattr("mongomock.codec_options.is_supported", lambda *args: None)  # noqa: ARG005
     # work around https://github.com/mongomock/mongomock/issues/912
     add_update = mongomock.collection.BulkOperationBuilder.add_update
 
@@ -71,21 +71,33 @@ def _patch_mongo(monkeypatch):
 
 @pytest.fixture(scope="session")
 def testing_config():
+    """Path to an Ampel config file suitable for testing."""
     return Path(__file__).parent / "test-data" / "testing-config.yaml"
 
 
-@pytest.mark.usefixtures("_patch_mongo")
 @pytest.fixture
-def mock_context(testing_config: Path):
-    return DevAmpelContext.load(config=str(testing_config), purge_db=True)
+def mock_context(testing_config: Path, tmp_path, _mongomock):
+    """An AmpelContext with a mongomock backend."""
+    # remove storageEngine options that are not supported by mongomock
+    with open(testing_config) as f:
+        config = yaml.safe_load(f)
+        for db in config["mongo"]["databases"]:
+            for collection in db["collections"]:
+                if "args" in collection and "storageEngine" in collection["args"]:
+                    collection["args"].pop("storageEngine")
+    sanitized_config = tmp_path / "sanitized-testing-config.yaml"
+    with open(sanitized_config, "w") as f:
+        yaml.safe_dump(config, f)
+        return DevAmpelContext.load(config=str(sanitized_config), purge_db=True)
 
 
 @pytest.fixture
-def integration_context(mongod, testing_config: Path):
+def integration_context(testing_config: Path, _mongod):
+    """An AmpelContext connected to a real MongoDB instance."""
     ctx = DevAmpelContext.load(
         config=str(testing_config),
         purge_db=True,
-        custom_conf={"resource.mongo": mongod},
+        custom_conf={"resource.mongo": _mongod},
     )
     yield ctx
     ctx.db.close()
@@ -99,4 +111,5 @@ def dev_context(request):
 
 @pytest.fixture
 def ampel_logger():
+    """An AmpelLogger instance with DEBUG level console output."""
     return AmpelLogger.get_logger(console=dict(level=DEBUG))

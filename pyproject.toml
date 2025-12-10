@@ -43,11 +43,35 @@ Repository = "https://github.com/AmpelProject/pytest-ampel-core"
 [project.entry-points.pytest11]
 ampel-core = "pytest_ampel.plugin"
 
+[packages]
+include = ["src.pytest_ampel"]
 
 [dependency-groups]
 dev = [
     "mypy (>=1.19.0,<2.0.0)"
 ]
 
+[tool.poetry]
+packages = [{ include = "pytest_ampel", from = "src" }]
+
 [tool.mypy]
 packages = ["src.pytest_ampel"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "DTZ",  # datetimez
+    "T20",  # print
+    "PT",   # pytest-style
+    "RET",  # return
+    "SLF",  # self
+    "SIM",  # simplify
+    "ARG",  # unused-arguments
+    "PL",   # pylint
+    "PERF", # perflint
+    "RUF",  # ruff
+]

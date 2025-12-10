@@ -1,0 +1,945 @@
+build:
+  date: 10/12/2025
+  time: '12:50:05'
+  by: jakob
+  conda: base
+  stop_on_errors: 2
+  config_validator: null
+  skip_default_processes: true
+  json_serializable: true
+  ext_resource: false
+  get_unit_env: false
+  ignore_channels: false
+  ignore_processes: false
+  ampel-interface: 0.10.5a8
+  ampel-core: 0.10.6a18
+mongo:
+  ingest:
+    stock: MongoStockIngester
+    t0: MongoT0Ingester
+    t1: MongoT1Ingester
+    t2: MongoT2Ingester
+    t3: MongoT3Ingester
+  databases:
+  - name: data
+    collections:
+    - name: stock
+      indexes:
+      - index:
+        - field: stock
+        - field: channel
+        args:
+          unique: true
+    - name: t0
+      indexes:
+      - field: id
+        args:
+          unique: true
+      - field: stock
+        args:
+          sparse: true
+    - name: t1
+      indexes:
+      - index:
+        - field: stock
+        - field: link
+        args:
+          unique: true
+      - field: channel
+      - field: code
+        args:
+          sparse: true
+    - name: t2
+      indexes:
+      - index:
+        - field: stock
+        - field: link
+      - field: channel
+      - field: code
+      - field: meta.ts
+    - name: t3
+      indexes:
+      - field: process
+      - field: meta.ts
+    - name: t4
+      indexes:
+      - field: process
+      - field: meta.ts
+    role:
+      r: logger
+      w: writer
+  - name: ext
+    collections:
+    - name: conf
+    - name: trace
+    - name: job
+    - name: counter
+    role:
+      r: logger
+      w: logger
+  - name: var
+    collections:
+    - name: log
+      indexes:
+      - field: r
+      - field: s
+        args:
+          sparse: true
+      - field: c
+        args:
+          sparse: true
+      args:
+        storageEngine:
+          wiredTiger:
+            configString: block_compressor=zlib
+    - name: event
+      indexes: null
+    - name: beacon
+      indexes: null
+    - name: trouble
+      indexes: null
+    role:
+      r: logger
+      w: logger
+  prefix: Ampel
+logging:
+  default:
+    console:
+      std_stream: stdout
+      datefmt: '%Y-%m-%d '
+      timefmt: '%H:%M:%S '
+      level: 2048
+      aggregate_interval: 1.0
+      density: default
+      terminator: '
+
+        '
+      log_sep: '
+
+        '
+      prefix: null
+      provenance: true
+      color: true
+      cdate: cornflower_blue
+      ctime: light_sea_green
+      cfile: salmon1
+      cline: rosy_brown
+      clvl: grey53
+    db:
+      level: 2048
+  compact:
+    console:
+      level: 2048
+      density: compact
+      log_sep: ''
+    db:
+      level: 2048
+  headerless:
+    console:
+      level: 2048
+      density: headerless
+    db:
+      level: 2048
+  prod:
+    console:
+      std_stream: stderr
+      level: 4096
+    db:
+      level: 2048
+  verbose:
+    console:
+      std_stream: stdout
+      level: 1024
+    db:
+      level: 1024
+  debug:
+    console:
+      std_stream: stdout
+      level: 512
+    db:
+      level: 512
+  silent: {}
+  console_quiet:
+    console:
+      level: 4096
+  console_info:
+    console:
+      level: 2048
+  console_verbose:
+    console:
+      level: 1024
+  console_debug:
+    console:
+      level: 512
+channel: {}
+unit:
+  DemoProcessor:
+    fqn: ampel.demo.DemoProcessor
+    base:
+    - DemoProcessor
+    - AbsEventUnit
+    - ContextUnit
+    xxh64: 8281300100313073163
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/demo/DemoProcessor.py
+  IngestionWorker:
+    fqn: ampel.ingest.IngestionWorker
+    base:
+    - IngestionWorker
+    - AbsEventUnit
+    - ContextUnit
+    xxh64: 14442819256911179592
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/ingest/IngestionWorker.py
+  OpsProcessor:
+    fqn: ampel.ops.OpsProcessor
+    base:
+    - OpsProcessor
+    - AbsEventUnit
+    - ContextUnit
+    xxh64: 15234424918224562521
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/ops/OpsProcessor.py
+  T2QueueWorker:
+    fqn: ampel.t2.T2QueueWorker
+    base:
+    - T2QueueWorker
+    - T2Worker
+    - AbsWorker
+    - AbsEventUnit
+    - ContextUnit
+    xxh64: 9761917718217925194
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t2/T2QueueWorker.py
+  T2Worker:
+    fqn: ampel.t2.T2Worker
+    base:
+    - T2Worker
+    - AbsWorker
+    - AbsEventUnit
+    - ContextUnit
+    xxh64: 10642110307745408251
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t2/T2Worker.py
+  T3Processor:
+    fqn: ampel.t3.T3Processor
+    base:
+    - T3Processor
+    - AbsEventUnit
+    - ContextUnit
+    xxh64: 5725603746595064425
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/T3Processor.py
+  T4Processor:
+    fqn: ampel.t4.T4Processor
+    base:
+    - T4Processor
+    - AbsEventUnit
+    - ContextUnit
+    - DocBuilder
+    xxh64: 6161864656479546928
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t4/T4Processor.py
+  ChainedT0Muxer:
+    fqn: ampel.ingest.ChainedT0Muxer
+    base:
+    - ChainedT0Muxer
+    - AbsT0Muxer
+    - ContextUnit
+    xxh64: 13469996781310191021
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/ingest/ChainedT0Muxer.py
+  MongoIngester:
+    fqn: ampel.mongo.update.MongoIngester
+    base:
+    - MongoIngester
+    - AbsIngester
+    - AbsContextManager
+    - ContextUnit
+    xxh64: 2790331036742963826
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/mongo/update/MongoIngester.py
+  MongoStockDeleter:
+    fqn: ampel.mongo.purge.MongoStockDeleter
+    base:
+    - MongoStockDeleter
+    - AbsOpsUnit
+    - ContextUnit
+    xxh64: 10019230342611180891
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/mongo/purge/MongoStockDeleter.py
+  QueueIngester:
+    fqn: ampel.queue.QueueIngester
+    base:
+    - QueueIngester
+    - AbsIngester
+    - AbsContextManager
+    - ContextUnit
+    xxh64: 3597392898476386980
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/queue/QueueIngester.py
+  SimpleT2BasedSupplier:
+    fqn: ampel.t3.supply.SimpleT2BasedSupplier
+    base:
+    - SimpleT2BasedSupplier
+    - AbsT3Supplier
+    - ContextUnit
+    xxh64: 5862946897053559896
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/supply/SimpleT2BasedSupplier.py
+  T3AdaptativeStager:
+    fqn: ampel.t3.stage.T3AdaptativeStager
+    base:
+    - T3AdaptativeStager
+    - T3ThreadedStager
+    - T3BaseStager
+    - AbsT3Stager
+    - ContextUnit
+    - DocBuilder
+    xxh64: 10607718304059557294
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/stage/T3AdaptativeStager.py
+  T3AggregatingStager:
+    fqn: ampel.t3.stage.T3AggregatingStager
+    base:
+    - T3AggregatingStager
+    - T3SequentialStager
+    - T3BaseStager
+    - AbsT3Stager
+    - ContextUnit
+    - DocBuilder
+    xxh64: 11447753997146506177
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/stage/T3AggregatingStager.py
+  T3BufferExporterStager:
+    fqn: ampel.cli.T3BufferExporterStager
+    base:
+    - T3BufferExporterStager
+    - AbsT3Stager
+    - ContextUnit
+    xxh64: 9176224965497852118
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/cli/T3BufferExporterStager.py
+  T3ChannelStager:
+    fqn: ampel.t3.stage.T3ChannelStager
+    base:
+    - T3ChannelStager
+    - AbsT3Stager
+    - ContextUnit
+    xxh64: 15040241164370441086
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/stage/T3ChannelStager.py
+  T3DefaultBufferSupplier:
+    fqn: ampel.t3.supply.T3DefaultBufferSupplier
+    base:
+    - T3DefaultBufferSupplier
+    - AbsT3Supplier
+    - ContextUnit
+    xxh64: 177029996330832417
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/supply/T3DefaultBufferSupplier.py
+  T3DistributiveStager:
+    fqn: ampel.t3.stage.T3DistributiveStager
+    base:
+    - T3DistributiveStager
+    - T3ThreadedStager
+    - T3BaseStager
+    - AbsT3Stager
+    - ContextUnit
+    - DocBuilder
+    xxh64: 16168460460362787531
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/stage/T3DistributiveStager.py
+  T3ExtJournalAppender:
+    fqn: ampel.t3.supply.complement.T3ExtJournalAppender
+    base:
+    - T3ExtJournalAppender
+    - AbsBufferComplement
+    - ContextUnit
+    xxh64: 10303600697083878147
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/supply/complement/T3ExtJournalAppender.py
+  T3FilteringStockSelector:
+    fqn: ampel.t3.supply.select.T3FilteringStockSelector
+    base:
+    - T3FilteringStockSelector
+    - T3StockSelector
+    - AbsT3Selector
+    - ContextUnit
+    xxh64: 736117426726534081
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/supply/select/T3FilteringStockSelector.py
+  T3LatestStateDataLoader:
+    fqn: ampel.t3.supply.load.T3LatestStateDataLoader
+    base:
+    - T3LatestStateDataLoader
+    - AbsT3Loader
+    - ContextUnit
+    xxh64: 10184423948152998266
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/supply/load/T3LatestStateDataLoader.py
+  T3LogsAppender:
+    fqn: ampel.t3.supply.complement.T3LogsAppender
+    base:
+    - T3LogsAppender
+    - AbsBufferComplement
+    - ContextUnit
+    xxh64: 17778272485979734196
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/supply/complement/T3LogsAppender.py
+  T3ProjectingStager:
+    fqn: ampel.t3.stage.T3ProjectingStager
+    base:
+    - T3ProjectingStager
+    - T3ThreadedStager
+    - T3BaseStager
+    - AbsT3Stager
+    - ContextUnit
+    - DocBuilder
+    xxh64: 4286998017656554040
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/stage/T3ProjectingStager.py
+  T3RandIntAppender:
+    fqn: ampel.t3.supply.complement.T3RandIntAppender
+    base:
+    - T3RandIntAppender
+    - AbsBufferComplement
+    - ContextUnit
+    xxh64: 11897013099886386240
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/supply/complement/T3RandIntAppender.py
+  T3SequentialStager:
+    fqn: ampel.t3.stage.T3SequentialStager
+    base:
+    - T3SequentialStager
+    - T3BaseStager
+    - AbsT3Stager
+    - ContextUnit
+    - DocBuilder
+    xxh64: 13265330298836740119
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/stage/T3SequentialStager.py
+  T3SessionAlertsNumber:
+    fqn: ampel.t3.include.session.T3SessionAlertsNumber
+    base:
+    - T3SessionAlertsNumber
+    - AbsT3Supplier
+    - ContextUnit
+    xxh64: 17466276394845956675
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/include/session/T3SessionAlertsNumber.py
+  T3SessionLastRunTime:
+    fqn: ampel.t3.include.session.T3SessionLastRunTime
+    base:
+    - T3SessionLastRunTime
+    - AbsT3Supplier
+    - ContextUnit
+    xxh64: 11546630926444517843
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/include/session/T3SessionLastRunTime.py
+  T3SimpleDataLoader:
+    fqn: ampel.t3.supply.load.T3SimpleDataLoader
+    base:
+    - T3SimpleDataLoader
+    - AbsT3Loader
+    - ContextUnit
+    xxh64: 12110161669031221840
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/supply/load/T3SimpleDataLoader.py
+  T3SimpleStager:
+    fqn: ampel.t3.stage.T3SimpleStager
+    base:
+    - T3SimpleStager
+    - T3ThreadedStager
+    - T3BaseStager
+    - AbsT3Stager
+    - ContextUnit
+    - DocBuilder
+    xxh64: 7318515918128220137
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/stage/T3SimpleStager.py
+  T3StockSelector:
+    fqn: ampel.t3.supply.select.T3StockSelector
+    base:
+    - T3StockSelector
+    - AbsT3Selector
+    - ContextUnit
+    xxh64: 9297652542317218040
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/supply/select/T3StockSelector.py
+  T4RunTimeContextUpdater:
+    fqn: ampel.t4.T4RunTimeContextUpdater
+    base:
+    - T4RunTimeContextUpdater
+    - AbsT4ControlUnit
+    - ContextUnit
+    - DocBuilder
+    xxh64: 16613931977779416555
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t4/T4RunTimeContextUpdater.py
+  DemoFirstPointT2Unit:
+    fqn: ampel.demo.DemoFirstPointT2Unit
+    base:
+    - DemoFirstPointT2Unit
+    - AbsPointT2Unit
+    - LogicalUnit
+    xxh64: 11730204309749858460
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/demo/DemoFirstPointT2Unit.py
+  DemoPointT2Unit:
+    fqn: ampel.demo.DemoPointT2Unit
+    base:
+    - DemoPointT2Unit
+    - AbsPointT2Unit
+    - LogicalUnit
+    xxh64: 7114215102973709426
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/demo/DemoPointT2Unit.py
+  DemoT3Unit:
+    fqn: ampel.demo.DemoT3Unit
+    base:
+    - DemoT3Unit
+    - AbsT3Unit
+    - LogicalUnit
+    xxh64: 17905373686009613727
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/demo/DemoT3Unit.py
+  DemoT4RunTimeAliasGenerator:
+    fqn: ampel.demo.DemoT4RunTimeAliasGenerator
+    base:
+    - DemoT4RunTimeAliasGenerator
+    - AbsT4Unit
+    - LogicalUnit
+    xxh64: 3832456297883784904
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/demo/DemoT4RunTimeAliasGenerator.py
+  DummyStateT2Unit:
+    fqn: ampel.test.DummyStateT2Unit
+    base:
+    - DummyStateT2Unit
+    - AbsStateT2Unit
+    - LogicalUnit
+    xxh64: 9721854387753414056
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/test/DummyStateT2Unit.py
+  NoShaper:
+    fqn: ampel.dev.NoShaper
+    base:
+    - NoShaper
+    - AbsT0Unit
+    - LogicalUnit
+    xxh64: 12652575467920327962
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/dev/NoShaper.py
+  T1SimpleCombiner:
+    fqn: ampel.t1.T1SimpleCombiner
+    base:
+    - T1SimpleCombiner
+    - AbsT1CombineUnit
+    - LogicalUnit
+    xxh64: 11619157323309951187
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t1/T1SimpleCombiner.py
+  T1SimpleRetroCombiner:
+    fqn: ampel.t1.T1SimpleRetroCombiner
+    base:
+    - T1SimpleRetroCombiner
+    - AbsT1CombineUnit
+    - LogicalUnit
+    xxh64: 13219416922985581374
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t1/T1SimpleRetroCombiner.py
+  T3BufferExporterUnit:
+    fqn: ampel.cli.T3BufferExporterUnit
+    base:
+    - T3BufferExporterUnit
+    - AbsT3Unit
+    - LogicalUnit
+    xxh64: 10052295788148574761
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/cli/T3BufferExporterUnit.py
+  T3LogAggregatedStocks:
+    fqn: ampel.t3.unit.T3LogAggregatedStocks
+    base:
+    - T3LogAggregatedStocks
+    - AbsT3Unit
+    - LogicalUnit
+    xxh64: 8340787247250073059
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/unit/T3LogAggregatedStocks.py
+  ComboDictModifier:
+    fqn: ampel.aux.ComboDictModifier
+    base:
+    - ComboDictModifier
+    - AbsApplicable
+    - AmpelBaseModel
+    xxh64: 12452397773771354818
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/aux/ComboDictModifier.py
+  SimpleTagFilter:
+    fqn: ampel.aux.SimpleTagFilter
+    base:
+    - SimpleTagFilter
+    - AbsApplicable
+    - AmpelBaseModel
+    xxh64: 451348699836474112
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/aux/SimpleTagFilter.py
+  FlatDictArrayFilter:
+    fqn: ampel.aux.filter.FlatDictArrayFilter
+    base:
+    - FlatDictArrayFilter
+    - AbsLogicOperatorFilter[MutableMapping]
+    - AbsLogicOperatorFilter
+    - AbsApplicable
+    - AmpelBaseModel
+    xxh64: 10136069419375369432
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/aux/filter/FlatDictArrayFilter.py
+  PrimitiveTypeArrayFilter:
+    fqn: ampel.aux.filter.PrimitiveTypeArrayFilter
+    base:
+    - PrimitiveTypeArrayFilter
+    - AbsLogicOperatorFilter[TypeVar]
+    - AbsLogicOperatorFilter
+    - AbsApplicable
+    - AmpelBaseModel
+    xxh64: 16039335024148128494
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/aux/filter/PrimitiveTypeArrayFilter.py
+  SimpleDictArrayFilter:
+    fqn: ampel.aux.filter.SimpleDictArrayFilter
+    base:
+    - SimpleDictArrayFilter
+    - AbsLogicOperatorFilter[TypeVar]
+    - AbsLogicOperatorFilter
+    - AbsApplicable
+    - AmpelBaseModel
+    xxh64: 1426938542812635099
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/aux/filter/SimpleDictArrayFilter.py
+  HashT2Config:
+    fqn: ampel.config.alter.HashT2Config
+    base:
+    - HashT2Config
+    - AbsConfigUpdater
+    xxh64: 14659643538611685423
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/config/alter/HashT2Config.py
+  ResolveRunTimeAliases:
+    fqn: ampel.config.alter.ResolveRunTimeAliases
+    base:
+    - ResolveRunTimeAliases
+    - AbsConfigUpdater
+    xxh64: 12781842929848848466
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/config/alter/ResolveRunTimeAliases.py
+  StockCompiler:
+    fqn: ampel.ingest.StockCompiler
+    base:
+    - StockCompiler
+    - AbsCompiler
+    xxh64: 13935990738727603753
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/ingest/StockCompiler.py
+  T0Compiler:
+    fqn: ampel.ingest.T0Compiler
+    base:
+    - T0Compiler
+    - AbsCompiler
+    xxh64: 14153878331368746456
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/ingest/T0Compiler.py
+  T1Compiler:
+    fqn: ampel.ingest.T1Compiler
+    base:
+    - T1Compiler
+    - AbsCompiler
+    xxh64: 12590721148534816981
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/ingest/T1Compiler.py
+  T2Compiler:
+    fqn: ampel.ingest.T2Compiler
+    base:
+    - T2Compiler
+    - AbsCompiler
+    xxh64: 9598969421479075868
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/ingest/T2Compiler.py
+  AmpelLogger:
+    fqn: ampel.log.AmpelLogger
+    base:
+    - AmpelLogger
+    - AbsContextManager
+    xxh64: 852359358953934363
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/log/AmpelLogger.py
+  MongoStockIngester:
+    fqn: ampel.mongo.update.MongoStockIngester
+    base:
+    - MongoStockIngester
+    - AbsDocIngester[StockDocument]
+    - AbsDocIngester
+    - HasUpdatesBuffer
+    - AmpelBaseModel
+    xxh64: 4399267697217271257
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/mongo/update/MongoStockIngester.py
+  MongoT0Ingester:
+    fqn: ampel.mongo.update.MongoT0Ingester
+    base:
+    - MongoT0Ingester
+    - AbsDocIngester[DataPoint]
+    - AbsDocIngester
+    - HasUpdatesBuffer
+    - AmpelBaseModel
+    xxh64: 664119635459602987
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/mongo/update/MongoT0Ingester.py
+  MongoT1Ingester:
+    fqn: ampel.mongo.update.MongoT1Ingester
+    base:
+    - MongoT1Ingester
+    - AbsDocIngester[T1Document]
+    - AbsDocIngester
+    - HasUpdatesBuffer
+    - AmpelBaseModel
+    xxh64: 11155546142519187491
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/mongo/update/MongoT1Ingester.py
+  MongoT2Ingester:
+    fqn: ampel.mongo.update.MongoT2Ingester
+    base:
+    - MongoT2Ingester
+    - AbsDocIngester[T2Document]
+    - AbsDocIngester
+    - HasUpdatesBuffer
+    - AmpelBaseModel
+    xxh64: 16489823956637273251
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/mongo/update/MongoT2Ingester.py
+  MongoT3Ingester:
+    fqn: ampel.mongo.update.MongoT3Ingester
+    base:
+    - MongoT3Ingester
+    - AbsDocIngester[T3Document]
+    - AbsDocIngester
+    - AmpelBaseModel
+    xxh64: 10260522449276161475
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/mongo/update/MongoT3Ingester.py
+  MongoAndView:
+    fqn: ampel.mongo.view.MongoAndView
+    base:
+    - MongoAndView
+    - AbsMongoFlatMultiView
+    - AbsMongoView
+    - AmpelBaseModel
+    xxh64: 8474450065063314114
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/mongo/view/MongoAndView.py
+  MongoOneView:
+    fqn: ampel.mongo.view.MongoOneView
+    base:
+    - MongoOneView
+    - AbsMongoView
+    - AmpelBaseModel
+    xxh64: 1317326232251776935
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/mongo/view/MongoOneView.py
+  MongoOrView:
+    fqn: ampel.mongo.view.MongoOrView
+    base:
+    - MongoOrView
+    - AbsMongoFlatMultiView
+    - AbsMongoView
+    - AmpelBaseModel
+    xxh64: 1027349560477802158
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/mongo/view/MongoOrView.py
+  NullProducer:
+    fqn: ampel.queue.NullProducer
+    base:
+    - NullProducer
+    - AbsProducer
+    - AbsContextManager
+    xxh64: 1645124090423176433
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/queue/NullProducer.py
+  DictSecretProvider:
+    fqn: ampel.secret.DictSecretProvider
+    base:
+    - DictSecretProvider
+    - AbsSecretProvider
+    xxh64: 5463823072174204555
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/secret/DictSecretProvider.py
+  DirSecretProvider:
+    fqn: ampel.secret.DirSecretProvider
+    base:
+    - DirSecretProvider
+    - AbsSecretProvider
+    xxh64: 1199301157642081372
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/secret/DirSecretProvider.py
+  PotemkinSecretProvider:
+    fqn: ampel.secret.PotemkinSecretProvider
+    base:
+    - PotemkinSecretProvider
+    - AbsSecretProvider
+    xxh64: 11131903779470022296
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/secret/PotemkinSecretProvider.py
+  T3AmpelBufferFilter:
+    fqn: ampel.t3.stage.filter.T3AmpelBufferFilter
+    base:
+    - T3AmpelBufferFilter
+    - AbsT3Filter
+    xxh64: 4639632822238168426
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/stage/filter/T3AmpelBufferFilter.py
+  T3BaseProjector:
+    fqn: ampel.t3.stage.project.T3BaseProjector
+    base:
+    - T3BaseProjector
+    - AbsT3Projector
+    xxh64: 4351059744041575722
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/stage/project/T3BaseProjector.py
+  T3ChannelProjector:
+    fqn: ampel.t3.stage.project.T3ChannelProjector
+    base:
+    - T3ChannelProjector
+    - T3BaseProjector
+    - AbsT3Projector
+    xxh64: 4953766797552088987
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/t3/stage/project/T3ChannelProjector.py
+  ChannelWithProcsTemplate:
+    fqn: ampel.template.ChannelWithProcsTemplate
+    base:
+    - ChannelWithProcsTemplate
+    - AbsChannelTemplate
+    - ChannelModel
+    - AmpelBaseModel
+    xxh64: 13059713349891099032
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/template/ChannelWithProcsTemplate.py
+  PeriodicSummaryT3:
+    fqn: ampel.template.PeriodicSummaryT3
+    base:
+    - PeriodicSummaryT3
+    - AbsConfigMorpher
+    - AmpelBaseModel
+    xxh64: 12458580501901027991
+    distrib: ampel-core
+    version: 0.10.6a18
+    source: /Users/jakob/Documents/ZTF/Ampel-v0.8.3/pytest-ampel-core/.venv/lib/python3.12/site-packages/ampel/template/PeriodicSummaryT3.py
+process:
+  t0: {}
+  t1: {}
+  t2: {}
+  t3: {}
+  ops: {}
+alias:
+  t0: {}
+  t1: {}
+  t2: {}
+  t3:
+    '%TRANSIENT':
+      col: stock
+    '%STOCK':
+      col: stock
+    '%DATAPOINT':
+      col: t0
+    '%T0':
+      col: t0
+    '%COMPOUND':
+      col: t1
+    '%T1':
+      col: t1
+    '%T2DOC':
+      col: t2
+    '%T2DOC_WITH_CONF':
+      col: t2
+      resolve_config: true
+    '%T2':
+      col: t2
+    '%T2RECORD':
+      col: t2
+resource:
+  mongo: mongodb://localhost:27017
+  extcats: mongodb://localhost:27017
+template:
+  hash_t2_config: ampel.config.alter.HashT2Config
+  resolve_run_time_aliases: ampel.config.alter.ResolveRunTimeAliases
+confid: {}
