@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [project]
 name = "pytest-ampel-core"
 description = "A plugin to provide AmpelContext fixtures in pytest"
-version = "0.10.0a1"
+version = "0.10.0a2"
 readme = "README.rst"
 requires-python = ">=3.10, <4"
 authors = [
