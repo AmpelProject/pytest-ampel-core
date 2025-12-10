@@ -16,8 +16,7 @@ on:
 
 jobs:
   ci:
-    # uses: AmpelProject/Ampel-interface/.github/workflows/ci.yml@0900945de79358f5ac065ab2129be44fcd0b11b8 # ci-py12-v9
-    uses: ./.github/workflows/ci.yml
+    uses: AmpelProject/Ampel-interface/.github/workflows/ci.yml@c855e93ae95c955ba292f88413455462398a8c9a # ci-py12-v10
     with:
       mongo: true
       format: true
