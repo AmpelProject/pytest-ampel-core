@@ -12,6 +12,8 @@ from ampel.config.builder.DisplayOptions import DisplayOptions
 from ampel.config.builder.DistConfigBuilder import DistConfigBuilder
 from ampel.dev.DevAmpelContext import DevAmpelContext
 from ampel.log.AmpelLogger import DEBUG, AmpelLogger
+from ampel.secret.AmpelVault import AmpelVault
+from ampel.secret.PotemkinSecretProvider import PotemkinSecretProvider
 
 
 def test_build_config() -> None:
@@ -120,18 +122,23 @@ def testing_config(tmp_path_factory):
 
 
 @pytest.fixture
-def mock_context(testing_config: Path, _mongomock):
+def mock_context(testing_config: Path, ampel_vault: AmpelVault, _mongomock):
     """An AmpelContext with a mongomock backend."""
-    return DevAmpelContext.load(config=str(testing_config), purge_db=True)
+    return DevAmpelContext.load(
+        config=str(testing_config),
+        vault=ampel_vault,
+        purge_db=True,
+    )
 
 
 @pytest.fixture
-def integration_context(testing_config: Path, _mongod):
+def integration_context(testing_config: Path, ampel_vault: AmpelVault, _mongod):
     """An AmpelContext connected to a real MongoDB instance."""
     ctx = DevAmpelContext.load(
         config=str(testing_config),
         purge_db=True,
         custom_conf={"resource.mongo": _mongod},
+        vault=ampel_vault,
     )
     yield ctx
     ctx.db.close()
@@ -147,3 +154,9 @@ def dev_context(request):
 def ampel_logger():
     """An AmpelLogger instance with DEBUG level console output."""
     return AmpelLogger.get_logger(console=dict(level=DEBUG))
+
+
+@pytest.fixture
+def ampel_vault():
+    """An AmpelVault instance configured with PotemkinSecretProvider."""
+    return AmpelVault([PotemkinSecretProvider()])
