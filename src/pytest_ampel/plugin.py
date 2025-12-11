@@ -16,29 +16,6 @@ from ampel.secret.AmpelVault import AmpelVault
 from ampel.secret.PotemkinSecretProvider import PotemkinSecretProvider
 
 
-def test_build_config() -> None:
-    cb = DistConfigBuilder(
-        DisplayOptions(verbose=True, debug=True),
-        ignore_exc=["ModuleNotFoundError"],
-    )
-    cb.load_distributions(
-        prefixes=[
-            "ampel-interface",
-            "ampel-core",
-            "ampel-alerts",
-            "ampel-photometry",
-            "ampel-ztf",
-            "ampel-hu-astro",
-        ]
-    )
-    config = cb.build_config(
-        stop_on_errors=2,
-        config_validator="ConfigValidator",
-        get_unit_env=False,
-    )
-    assert config is not None
-
-
 def pytest_addoption(parser):
     parser.addoption(
         "--integration",
@@ -102,7 +79,7 @@ def testing_config(tmp_path_factory):
     config_path = tmp_path_factory.mktemp("config") / "testing-config.yaml"
     # build a config from all available ampel distributions
     cb = DistConfigBuilder(
-        DisplayOptions(verbose=True, debug=True),
+        DisplayOptions(verbose=False, debug=False),
     )
     cb.load_distributions()
     config = cb.build_config(
