@@ -89,11 +89,14 @@ def testing_config(tmp_path_factory, pytestconfig):
             get_unit_env=False,
         )
         assert config is not None
-        # remove storageEngine options that are not supported by mongomock
+        # massage db settings for use with mongomock
         for db in config["mongo"]["databases"]:
             for collection in db["collections"]:
+                # remove unsuported storageEngine options
                 if "args" in collection and "storageEngine" in collection["args"]:
                     collection["args"].pop("storageEngine")
+            # ensure that r and w modes share a client
+            db["role"]["r"] = db["role"]["w"]
         pytestconfig.cache.set("testing_config", config)
     with open(config_path, "w") as f:
         yaml.safe_dump(config, f)
