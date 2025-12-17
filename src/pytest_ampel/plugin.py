@@ -74,25 +74,27 @@ def _mongomock(monkeypatch):
 
 
 @pytest.fixture(scope="session")
-def testing_config(tmp_path_factory):
+def testing_config(tmp_path_factory, pytestconfig):
     """Path to an Ampel config file suitable for testing."""
     config_path = tmp_path_factory.mktemp("config") / "testing-config.yaml"
-    # build a config from all available ampel distributions
-    cb = DistConfigBuilder(
-        DisplayOptions(verbose=False, debug=False),
-    )
-    cb.load_distributions()
-    config = cb.build_config(
-        stop_on_errors=2,
-        config_validator="ConfigValidator",
-        get_unit_env=False,
-    )
-    assert config is not None
-    # remove storageEngine options that are not supported by mongomock
-    for db in config["mongo"]["databases"]:
-        for collection in db["collections"]:
-            if "args" in collection and "storageEngine" in collection["args"]:
-                collection["args"].pop("storageEngine")
+    if (config := pytestconfig.cache.get("testing_config", None)) is None:
+        # build a config from all available ampel distributions
+        cb = DistConfigBuilder(
+            DisplayOptions(verbose=False, debug=False),
+        )
+        cb.load_distributions()
+        config = cb.build_config(
+            stop_on_errors=2,
+            config_validator="ConfigValidator",
+            get_unit_env=False,
+        )
+        assert config is not None
+        # remove storageEngine options that are not supported by mongomock
+        for db in config["mongo"]["databases"]:
+            for collection in db["collections"]:
+                if "args" in collection and "storageEngine" in collection["args"]:
+                    collection["args"].pop("storageEngine")
+        pytestconfig.cache.set("testing_config", config)
     with open(config_path, "w") as f:
         yaml.safe_dump(config, f)
     return config_path
