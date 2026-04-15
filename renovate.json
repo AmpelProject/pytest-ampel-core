@@ -5,8 +5,7 @@
     "github>AmpelProject/renovate-config//regexManagers/precommitVersions"
   ],
   "baseBranches": [
-    "main",
-    "stable/v0.8"
+    "main"
   ],
   "packageRules": [
     {
