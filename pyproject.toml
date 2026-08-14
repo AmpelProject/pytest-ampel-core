@@ -45,7 +45,7 @@ ampel-core = "pytest_ampel.plugin"
 
 [dependency-groups]
 dev = [
-    "mypy (>=1.19.0,<2.0.0)",
+    "mypy (>=2.3.0,<2.4.0)",
     "types-pyyaml (>=6.0.12.20250915,<7.0.0.0)"
 ]
 
