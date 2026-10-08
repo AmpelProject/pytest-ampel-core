@@ -22,11 +22,11 @@ jobs:
       format: true
       lint: true
       # renovate: datasource=python-version depName=python
-      python-version: "3.14.7"
+      python-version: "3.14.8"
       # renovate: datasource=pypi depName=ruff versioning=pep440
-      ruff-version: "0.16.6"
+      ruff-version: "0.16.10"
       # renovate: datasource=pypi depName=poetry versioning=pep440
-      poetry-version: "2.4.3"
+      poetry-version: "2.5.1"
   # Need to keep this step separate until pypi trusted publishing supports reusable workflows: https://github.com/pypi/warehouse/issues/11096
   pypi:
     needs: ci
